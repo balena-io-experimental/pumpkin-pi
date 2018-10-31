@@ -5,7 +5,7 @@ import math
 class Motor:
     motor_outputs = [24,25,18,23]
     home_active = 4
-    hold_position = True
+    hold_position = False
     slew_speed = 60
     acceleration = 80
     steps_per_unit = 20
@@ -107,8 +107,8 @@ class Motor:
 
         # if negative, go reverse
         if difference < 0:
-            self.move_degrees(abs(difference), 'r')
+            self.move_degrees(abs(difference), 'f')
         else:
-            self.move_degrees(difference, 'f')
+            self.move_degrees(difference, 'r')
 
         self.current_angle = angle

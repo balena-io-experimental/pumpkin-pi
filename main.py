@@ -11,12 +11,14 @@ from picamera import PiCamera
 from motor import Motor
 motor = Motor()
 
+execfile('led.py')
 
 
-camera = PiCamera()
-camera.framerate = 30
-camera.resolution = (400, 304)
-rawCapture = PiRGBArray(camera, size=(400, 304))
+
+camera = PiCamera(sensor_mode=1)
+camera.framerate = 12
+camera.resolution = (1280, 720)
+rawCapture = PiRGBArray(camera, size=(1280, 720))
 
 # faceCascade = cv2.CascadeClassifier('/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml')
 # hog = cv2.HOGDescriptor()
@@ -59,6 +61,7 @@ def index():
 
 def gen():
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        e1 = cv2.getTickCount()
 
         image = frame.array
 
@@ -92,9 +95,10 @@ def gen():
     				(0, 255, 255), 2)
     			cv2.circle(image, center, 5, (0, 0, 255), -1)
 
-                xpos = float(center[0]) / 400
+                xpos = float(center[0]) / 1280
 
                 motor.set_angle(round(xpos*160))
+                print(round(xpos*160))
 
         # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         #
@@ -115,6 +119,11 @@ def gen():
 
         output_frame = cv2.imencode('.jpg', image)[1].tostring()
         rawCapture.truncate(0)
+
+        # your code execution
+        e2 = cv2.getTickCount()
+        time = (e2 - e1)/ cv2.getTickFrequency()
+        print(time)
 
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + output_frame + b'\r\n')
