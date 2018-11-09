@@ -20,12 +20,8 @@ camera.framerate = 12
 camera.resolution = (1280, 720)
 rawCapture = PiRGBArray(camera, size=(1280, 720))
 
-# faceCascade = cv2.CascadeClassifier('/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml')
-# hog = cv2.HOGDescriptor()
-# hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
-
-greenLower = (0, 0, 200)
-greenUpper = (0, 0, 255)
+colorLower = (0, 0, 200)
+colorUpper = (0, 0, 255)
 
 
 # allow the camera to warmup
@@ -36,24 +32,6 @@ def movedamotor():
     distance = request.args.get('dist')
     motor.set_angle(int(distance))
     return 'OK'
-
-# @app.route('/')
-# def image():
-#     rawCapture.truncate(0)
-#
-#     camera.capture(rawCapture, format="bgr")
-#     image = rawCapture.array
-#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-#
-#     faces = faceCascade.detectMultiScale(gray, 1.3, 6)
-#
-#     for (x, y, w, h) in faces:
-#         cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
-#
-#     cv2.imwrite('static/sample.png', image);
-#     return '<img src="static/sample.png"/>'
-
-
 
 @app.route('/')
 def index():
@@ -68,7 +46,7 @@ def gen():
         blurred = cv2.GaussianBlur(image, (11, 11), 0)
     	hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-        mask = cv2.inRange(hsv, greenLower, greenUpper)
+        mask = cv2.inRange(hsv, colorLower, colorUpper)
     	mask = cv2.erode(mask, None, iterations=2)
     	mask = cv2.dilate(mask, None, iterations=2)
 
@@ -100,27 +78,9 @@ def gen():
                 motor.set_angle(round(xpos*160))
                 print(round(xpos*160))
 
-        # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        #
-        # faces = faceCascade.detectMultiScale(gray, 1.3, 6)
-
-        # (rects, weights) = hog.detectMultiScale(image, winStride=(4, 4),
-		#                                         padding=(8, 8), scale=1.05)
-        #
-        # for (x, y, w, h) in rects:
-        #     cv2.rectangle(image, (x, y), (x+w, y+h), (0, 0, 255), 2)
-        #
-    	# rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
-    	# pick = non_max_suppression(rects, probs=None, overlapThresh=0.65)
-
-    	# draw the final bounding boxes
-    	# for (xA, yA, xB, yB) in faces:
-    	# 	cv2.rectangle(image, (xA, yA), (xB, yB), (0, 255, 0), 2)
-
         output_frame = cv2.imencode('.jpg', image)[1].tostring()
         rawCapture.truncate(0)
 
-        # your code execution
         e2 = cv2.getTickCount()
         time = (e2 - e1)/ cv2.getTickFrequency()
         print(time)
@@ -137,31 +97,3 @@ def video_feed():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
-
-
-# GpioPins = [24,25,17,23]
-
-# step_sequence = [
-#   [1,0,0,0],
-#   [1,1,0,0],
-#   [0,1,0,0],
-#   [0,1,1,0],
-#   [0,0,1,0],
-#   [0,0,1,1],
-#   [0,0,0,1],
-#   [1,0,0,1]
-# ]
-
-# for i in range(512):
-#   for halfstep in range(8):
-#     for pin in range(4):
-#       GPIO.output(control_pins[pin], halfstep_seq[halfstep][pin])
-#     time.sleep(0.001)
-
-# main loop:
-# take frame from camera
-# analyse for body sized objects
-# initiate tracker(s) on discovered object(s)
-# pick one object to follow, and retain that one until it is lost from frame (to prevent jumping between objects)
-# use the position of the center of the object in the image to map to the range of motion of the stepper
-# update the stepper location to align with the object
