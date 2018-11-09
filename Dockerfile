@@ -1,5 +1,8 @@
 FROM mohaseeb/raspberrypi3-python-opencv:latest
 
+# This is to bypass platform detection in packages such as picamera
+ENV READTHEDOCS True
+
 COPY ./requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 
